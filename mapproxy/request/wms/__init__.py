@@ -193,7 +193,9 @@ class WMSMapRequest(WMSRequest):
     def validate(self):
         self.validate_param()
         self.validate_bbox()
-        self.validate_styles()
+        
+        # Remove the style validation since it always fails when custom styles are provided
+        # self.validate_styles()
 
     def validate_param(self):
         missing_param = []
