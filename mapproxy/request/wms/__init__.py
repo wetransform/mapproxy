@@ -104,7 +104,7 @@ class WMSMapRequestParams(RequestParams):
         if transparent.lower() == 'true':
             return True    
         else:
-            raise RequestError('invalid TRANSPARENT value ' + transparent, code=400)
+            raise RequestError('invalid TRANSPARENT value ' + transparent, status=400)
 
     def _set_transparent(self, transparent):
         self.params['transparent'] = str(transparent).lower()
@@ -199,8 +199,7 @@ class WMSMapRequest(WMSRequest):
         self.validate_param()
         self.validate_bbox()
         
-        # Remove the style validation since it always fails when custom styles are provided
-        # self.validate_styles()
+        self.validate_styles()
 
     def validate_param(self):
         missing_param = []
@@ -237,8 +236,9 @@ class WMSMapRequest(WMSRequest):
         if 'styles' in self.params:
             styles = self.params['styles']
             if not set(styles.split(',')).issubset(set(['default', '', 'inspire_common:DEFAULT'])):
-                raise RequestError('unsupported styles: ' + self.params['styles'],
-                                   code='StyleNotDefined', request=self)
+                # If the styles requested are not among the default ones, raise an error so the client of the 
+                # request can try asking Deegree directly if those styles are valid
+                raise RequestError('unknown styles: ' + str(self.params['styles']))
 
 
     @property
